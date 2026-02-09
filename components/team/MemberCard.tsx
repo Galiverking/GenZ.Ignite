@@ -2,9 +2,10 @@
 
 import { motion } from "framer-motion";
 import { Instagram } from "lucide-react";
+import { Member } from "@/types";
 
 interface MemberProps {
-    member: any;
+    member: Member;
     index: number;
 }
 

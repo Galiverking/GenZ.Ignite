@@ -7,3 +7,14 @@ export interface Policy {
     progress: number;
     image_url?: string;
 }
+
+export interface Member {
+    id: number;
+    name: string;
+    nickname: string;
+    role: string;
+    quote?: string;
+    instagram?: string;
+    image_url?: string;
+    order?: number;
+}
