@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CampaignHero from "@/components/campaign/CampaignHero";
-import Marquee from "@/components/ui/Marquee";
+
 import PolicyVoting from "@/components/campaign/PolicyVoting";
 import LivePoll from "@/components/campaign/LivePoll";
 import SocialShareCard from "@/components/campaign/SocialShareCard";
@@ -17,11 +17,6 @@ export default function Home() {
     const [policies, setPolicies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const news = [
-        "📢 สมัครสตาฟกีฬาสี วันสุดท้าย!",
-        "🚧 ซ่อมบำรุงทางเดินเชื่อมตึก 4 เสร็จสิ้นแล้ว",
-        "📅 ประกาศผลสอบกลางภาค วันจันทร์ที่ 12 นี้",
-    ];
 
     useEffect(() => {
         const fetchPolicies = async () => {
@@ -53,10 +48,6 @@ export default function Home() {
             {/* 2. Hero Section (Campaign Mode) */}
             <CampaignHero />
 
-            {/* 3. Marquee (Transition Divider) */}
-            <div className="border-y border-white/10 bg-black py-4">
-                <Marquee items={news} speed={40} />
-            </div>
 
             {/* 4. Why Vote For Us? */}
             <WhyVoteSection />
