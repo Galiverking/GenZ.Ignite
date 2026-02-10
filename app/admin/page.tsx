@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
     TrendingUp,
     Users,
@@ -8,7 +10,8 @@ import {
     MessageSquare,
     ArrowUpRight,
     Clock,
-    Activity
+    Activity,
+    RefreshCcw
 } from "lucide-react";
 import {
     AreaChart,
@@ -20,17 +23,93 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
-const data = [
-    { name: 'Mon', votes: 400 },
-    { name: 'Tue', votes: 300 },
-    { name: 'Wed', votes: 200 },
-    { name: 'Thu', votes: 278 },
-    { name: 'Fri', votes: 189 },
-    { name: 'Sat', votes: 239 },
-    { name: 'Sun', votes: 349 },
-];
-
 export default function AdminDashboard() {
+    const [stats, setStats] = useState({
+        policies: 0,
+        members: 0,
+        votes: 0,
+        complaints: 0,
+        pendingComplaints: 0
+    });
+    const [activities, setActivities] = useState<any[]>([]);
+    const [chartData, setChartData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // 1. Fetch Policies & Total Votes
+            const { data: policiesData } = await supabase.from("policies").select("votes");
+            const totalPolicies = policiesData?.length || 0;
+            const totalVotes = policiesData?.reduce((acc, curr) => acc + (curr.votes || 0), 0) || 0;
+
+            // 2. Fetch Members
+            const { count: membersCount } = await supabase.from("members").select("*", { count: 'exact', head: true });
+
+            // 3. Fetch Complaints
+            const { data: complaintsData } = await supabase
+                .from("complaints")
+                .select("*")
+                .order("id", { ascending: false });
+
+            const totalComplaints = complaintsData?.length || 0;
+            const pendingComplaints = complaintsData?.filter(c => c.status === 'pending').length || 0;
+
+            // 4. Update Stats State
+            setStats({
+                policies: totalPolicies,
+                members: membersCount || 0,
+                votes: totalVotes,
+                complaints: totalComplaints,
+                pendingComplaints: pendingComplaints
+            });
+
+            // 5. Recent Activities (from complaints)
+            const recentActivities = complaintsData?.slice(0, 5).map(c => ({
+                id: c.id,
+                icon: MessageSquare,
+                color: c.status === 'pending' ? "bg-primary/20 text-primary" : "bg-green-500/20 text-green-400",
+                title: c.status === 'pending' ? "เรื่องร้องเรียนใหม่" : "เรื่องร้องเรียนถูกแก้ไข",
+                time: getTimeAgo(new Date(c.created_at)),
+                desc: c.topic
+            })) || [];
+            setActivities(recentActivities);
+
+            // 6. Chart Data (Logic: Top 7 Policies by Votes)
+            const { data: topPolicies } = await supabase
+                .from("policies")
+                .select("title, votes")
+                .order("votes", { ascending: false })
+                .limit(7);
+
+            const formattedChartData = topPolicies?.map(p => ({
+                name: p.title.substring(0, 10) + (p.title.length > 10 ? "..." : ""),
+                votes: p.votes
+            })).reverse() || [];
+
+            setChartData(formattedChartData);
+
+        } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const getTimeAgo = (date: Date) => {
+        const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+        if (seconds < 60) return `${seconds} วินาทีที่แล้ว`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours} ชม. ที่แล้ว`;
+        return date.toLocaleDateString("th-TH");
+    };
+
     return (
         <div className="space-y-8 pb-12">
             {/* Header Section */}
@@ -39,15 +118,25 @@ export default function AdminDashboard() {
                     <h1 className="text-4xl font-black text-white tracking-tighter">
                         ภาพรวมระบบ <span className="text-primary italic">DASHBOARD</span>
                     </h1>
-                    <p className="text-gray-500 font-medium">ยินดีต้อนรับกลับมา, พรุ่งนี้รวย! 🚀</p>
+                    <p className="text-gray-500 font-medium">ข้อมูลอัปเดตวินาทีต่อวินาทีจากระบบ Supabase ⚡</p>
                 </div>
-                <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-2 rounded-2xl">
-                    <div className="bg-primary/20 text-primary p-2 rounded-xl">
-                        <TrendingUp size={20} />
-                    </div>
-                    <div className="pr-4">
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none mb-1">Status</p>
-                        <p className="text-sm font-black text-white leading-none">Healthy System</p>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={fetchData}
+                        disabled={loading}
+                        className="bg-white/5 border border-white/10 p-3 rounded-2xl text-gray-400 hover:text-white transition-all flex items-center gap-2 group"
+                    >
+                        <RefreshCcw size={18} className={loading ? "animate-spin" : "group-hover:rotate-180 transition-transform duration-500"} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Update Realtime</span>
+                    </button>
+                    <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-2 rounded-2xl">
+                        <div className="bg-primary/20 text-primary p-2 rounded-xl">
+                            <TrendingUp size={20} />
+                        </div>
+                        <div className="pr-4">
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none mb-1">Status</p>
+                            <p className="text-sm font-black text-white leading-none">Healthy System</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -56,35 +145,31 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     title="นโยบายทั้งหมด"
-                    value="15"
-                    trend="+2"
+                    value={loading ? "..." : stats.policies.toString()}
                     icon={FileText}
                     color="primary"
                     label="Policies Active"
                 />
                 <StatCard
                     title="ทีมงานสมาชิก"
-                    value="12"
-                    trend="0"
+                    value={loading ? "..." : stats.members.toString()}
                     icon={Users}
                     color="secondary"
                     label="Active Members"
                 />
                 <StatCard
                     title="คะแนนโหวตสะสม"
-                    value="3,420"
-                    trend="+124"
+                    value={loading ? "..." : stats.votes.toLocaleString()}
                     icon={TrendingUp}
                     color="accent"
                     label="Total Votes"
                 />
                 <StatCard
                     title="เรื่องร้องเรียน"
-                    value="8"
-                    trend="+3"
+                    value={loading ? "..." : stats.pendingComplaints.toString()}
                     icon={MessageSquare}
                     color="red"
-                    label="Unresolved Issues"
+                    label="Pending Issues"
                 />
             </div>
 
@@ -97,58 +182,62 @@ export default function AdminDashboard() {
 
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-xl font-black text-white tracking-tight">สถิติคะแนนโหวตรายสัปดาห์</h2>
-                            <p className="text-gray-500 text-sm">การเติบโตของการมีส่วนร่วมของนักเรียน</p>
+                            <h2 className="text-xl font-black text-white tracking-tight">อันดับความนิยมรายนโยบาย</h2>
+                            <p className="text-gray-500 text-sm">เปรียบเทียบคะแนนโหวตของ 7 นโยบายที่ติดเทรนด์</p>
                         </div>
-                        <select className="bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold focus:outline-none focus:border-primary transition-all">
-                            <option>7 วันล่าสุด</option>
-                            <option>30 วันล่าสุด</option>
-                        </select>
                     </div>
 
                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data}>
-                                <defs>
-                                    <linearGradient id="colorVotes" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="#ffffff20"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <YAxis
-                                    stroke="#ffffff20"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: '#0d1117',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '16px',
-                                        fontSize: '12px',
-                                        fontWeight: 'bold'
-                                    }}
-                                    itemStyle={{ color: 'var(--primary)' }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="votes"
-                                    stroke="var(--primary)"
-                                    strokeWidth={4}
-                                    fillOpacity={1}
-                                    fill="url(#colorVotes)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {loading ? (
+                            <div className="h-full w-full flex items-center justify-center text-gray-500 text-xs font-black uppercase tracking-widest">
+                                Loading Data...
+                            </div>
+                        ) : chartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData}>
+                                    <defs>
+                                        <linearGradient id="colorVotes" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="#ffffff20"
+                                        fontSize={10}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <YAxis
+                                        stroke="#ffffff20"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: '#0d1117',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '16px',
+                                            fontSize: '11px',
+                                            fontWeight: 'bold'
+                                        }}
+                                        itemStyle={{ color: 'var(--primary)' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="votes"
+                                        stroke="var(--primary)"
+                                        strokeWidth={4}
+                                        fillOpacity={1}
+                                        fill="url(#colorVotes)"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full w-full flex items-center justify-center text-gray-700">ไม่มีข้อมูลแสดงผล</div>
+                        )}
                     </div>
                 </div>
 
@@ -160,34 +249,30 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="space-y-6">
-                        <ActivityItem
-                            icon={MessageSquare}
-                            color="bg-primary/20 text-primary"
-                            title="เรื่องร้องเรียนใหม่"
-                            time="2 นาทีที่แล้ว"
-                            desc="มีคนแจ้งเรื่องแอร์ห้องสมุดไม่เย็น"
-                        />
-                        <ActivityItem
-                            icon={TrendingUp}
-                            color="bg-accent/20 text-accent"
-                            title="ยอดโหวตพุ่ง!"
-                            time="15 นาทีที่แล้ว"
-                            desc="นโยบาย 'เพิ่มเวลาพัก' มียอดโหวตครบ 500"
-                        />
-                        <ActivityItem
-                            icon={Users}
-                            color="bg-secondary/20 text-secondary"
-                            title="อัปเดตสมาชิก"
-                            time="1 ชม. ที่แล้ว"
-                            desc="คุณได้แก้ไขข้อมูลของ 'กัปตัน ทีมอีสปอร์ต'"
-                        />
-                        <ActivityItem
-                            icon={Clock}
-                            color="bg-gray-500/20 text-gray-400"
-                            title="ระบบสำรองข้อมูล"
-                            time="4 ชม. ที่แล้ว"
-                            desc="Auto backup สำเร็จแล้ว (345MB)"
-                        />
+                        {loading ? (
+                            Array(4).fill(0).map((_, i) => (
+                                <div key={i} className="flex gap-4 animate-pulse opacity-50">
+                                    <div className="w-12 h-12 bg-white/5 rounded-2xl" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-4 bg-white/5 rounded w-1/2" />
+                                        <div className="h-3 bg-white/5 rounded w-full" />
+                                    </div>
+                                </div>
+                            ))
+                        ) : activities.length > 0 ? (
+                            activities.map((act) => (
+                                <ActivityItem
+                                    key={act.id}
+                                    icon={act.icon}
+                                    color={act.color}
+                                    title={act.title}
+                                    time={act.time}
+                                    desc={act.desc}
+                                />
+                            ))
+                        ) : (
+                            <p className="text-center py-12 text-gray-600 text-xs font-bold italic">ยังไม่มีกิจกรรมใหม่...</p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -195,7 +280,7 @@ export default function AdminDashboard() {
     );
 }
 
-function StatCard({ title, value, trend, icon: Icon, color, label }: any) {
+function StatCard({ title, value, icon: Icon, color, label }: any) {
     const colors: any = {
         primary: "from-primary/20 to-transparent text-primary",
         secondary: "from-secondary/20 to-transparent text-secondary",
@@ -214,12 +299,6 @@ function StatCard({ title, value, trend, icon: Icon, color, label }: any) {
                 <div className={`p-3 rounded-2xl bg-white/5 border border-white/10 ${colors[color].split(' ').pop()}`}>
                     <Icon size={24} />
                 </div>
-                {trend !== "0" && (
-                    <div className="flex items-center gap-1 text-[10px] font-black text-green-400 bg-green-400/10 px-2 py-1 rounded-full border border-green-400/20">
-                        <ArrowUpRight size={10} />
-                        {trend}
-                    </div>
-                )}
             </div>
 
             <div className="relative z-10">
@@ -239,7 +318,7 @@ function ActivityItem({ icon: Icon, color, title, time, desc }: any) {
             <div className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 transition-transform group-hover:scale-110 ${color}`}>
                 <Icon size={20} />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
                 <div className="flex justify-between items-center mb-1">
                     <h4 className="text-sm font-bold text-white truncate">{title}</h4>
                     <span className="text-[10px] text-gray-600 font-bold shrink-0">{time}</span>
