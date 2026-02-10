@@ -62,9 +62,9 @@ export default function MembersAdmin() {
                 .getPublicUrl(filePath);
 
             return publicUrl;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error uploading image:', error);
-            alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+            alert(`เกิดข้อผิดพลาดในการอัปโหลด: ${error.message || 'ไม่ทราบสาเหตุ'} (โปรดตรวจสอบว่าสร้าง Bucket ชื่อ "images" ใน Supabase แล้ว)`);
             return null;
         }
     };
