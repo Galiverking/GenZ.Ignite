@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Users, FileText, Settings, LayoutDashboard, MessageSquare, LogOut, Search, Bell } from "lucide-react";
+import { Users, FileText, Settings, LayoutDashboard, MessageSquare, LogOut, Search, Bell, Loader2, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { clsx } from "clsx";
 
@@ -16,6 +16,34 @@ export default function AdminLayout({
     const pathname = usePathname();
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                router.replace("/login");
+            } else {
+                setUser(session.user);
+                setIsLoading(false);
+            }
+        };
+
+        checkAuth();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!session) {
+                router.replace("/login");
+            } else {
+                setUser(session.user);
+                setIsLoading(false);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [router]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -28,6 +56,28 @@ export default function AdminLayout({
         { name: "จัดการสมาชิก", path: "/admin/members", icon: Users },
         { name: "เรื่องร้องเรียน", path: "/admin/complaints", icon: MessageSquare },
     ];
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center relative overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] opacity-50" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] opacity-50" />
+
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="z-10 text-center"
+                >
+                    <div className="relative mb-6">
+                        <div className="w-20 h-20 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto" />
+                        <ShieldAlert className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" size={32} />
+                    </div>
+                    <h2 className="text-xl font-black text-white tracking-widest uppercase mb-2 italic">Security Check</h2>
+                    <p className="text-gray-500 font-bold text-xs animate-pulse">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen bg-[#020617] text-white font-sans selection:bg-primary/30">
@@ -127,12 +177,12 @@ export default function AdminLayout({
                     {/* User Profile Hook */}
                     <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3 px-2">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-700 to-gray-800 border-2 border-white/10 overflow-hidden">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="User" />
+                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'Admin'}`} alt="User" />
                         </div>
                         {isSidebarOpen && (
                             <div className="flex flex-col">
-                                <span className="text-xs font-black">Admin User</span>
-                                <span className="text-[10px] text-gray-500 uppercase tracking-widest">Administrator</span>
+                                <span className="text-[10px] font-black truncate max-w-[150px]">{user?.email || 'Admin User'}</span>
+                                <span className="text-[10px] text-gray-500 uppercase tracking-widest leading-none">Administrator</span>
                             </div>
                         )}
                     </div>
