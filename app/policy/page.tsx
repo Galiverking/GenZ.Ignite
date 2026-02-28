@@ -83,10 +83,10 @@ export default function PolicyPage() {
                         transition={{ delay: 0.1 }}
                         className="text-5xl md:text-7xl font-black text-white mb-6"
                     >
-                        ติดตาม <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">คำสัญญา</span> ของเรา
+                        ติดตาม <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">นโยบายสภานักเรียน</span>
                     </motion.h1>
                     <p className="text-gray-400 text-xl max-w-2xl mx-auto font-medium">
-                        เรายึดถือความโปร่งใสเป็นหลัก ตรวจสอบสถานะการดำเนินงานของทุกนโยบายได้ที่นี่
+                        ติดตามสถานะการดำเนินงานของสภานักเรียนได้แบบ Real-time ทุกนโยบายโปร่งใส ตรวจสอบได้
                     </p>
                 </div>
             </section>
@@ -156,8 +156,8 @@ export default function PolicyPage() {
                                                 onClick={() => handleVote(policy.id, policy.votes)}
                                                 disabled={votedIds.includes(policy.id)}
                                                 className={`flex items-center gap-3 px-6 py-3 rounded-2xl transition-all font-bold ${votedIds.includes(policy.id)
-                                                        ? "bg-primary/20 text-primary border border-primary/30"
-                                                        : "bg-white/5 border border-white/10 text-white hover:bg-primary hover:border-primary group/vote"
+                                                    ? "bg-primary/20 text-primary border border-primary/30"
+                                                    : "bg-white/5 border border-white/10 text-white hover:bg-primary hover:border-primary group/vote"
                                                     }`}
                                             >
                                                 <div className="relative">
@@ -185,7 +185,7 @@ export default function PolicyPage() {
             {/* Footer / Back Link */}
             <footer className="py-12 border-t border-white/5 bg-black/50">
                 <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-gray-500 text-sm">© 2026 GenZ Ignite Campaign. สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์</p>
+                    <p className="text-gray-500 text-sm">© 2026 สภานักเรียน GenZ Ignite. สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์</p>
                     <div className="flex gap-8">
                         <a href="/" className="text-gray-400 hover:text-primary transition-colors text-sm font-bold italic">Back to Home</a>
                         <a href="/report" className="text-gray-400 hover:text-secondary transition-colors text-sm font-bold italic">Report Issue</a>

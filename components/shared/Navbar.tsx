@@ -32,6 +32,7 @@ export default function Navbar() {
 
     const navItems = [
         { name: "หน้าแรก", path: "/" },
+        { name: "ข่าวสาร", path: "/announcements" },
         { name: "นโยบาย", path: "/policy" },
         { name: "ทีมงาน", path: "/team" },
     ];
@@ -56,7 +57,7 @@ export default function Navbar() {
                         <div className="w-10 h-10 relative flex items-center justify-center transition-transform group-hover:scale-110">
                             <img src="/logo.png" alt="GenZ Ignite Logo" className="w-full h-full object-contain" />
                         </div>
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-white font-black text-xl md:text-2xl">GenZ Ignite</span>
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-white font-black text-xl md:text-2xl">สภา GenZ Ignite</span>
                     </Link>
 
                     {/* Menu (Desktop) */}
@@ -151,7 +152,7 @@ export default function Navbar() {
                         </motion.div>
 
                         <div className="mt-auto pb-12 text-center text-[10px] text-white/20 font-black uppercase tracking-[0.3em]">
-                            GenZ Ignite © 2026 • Movement of Change
+                            สภานักเรียน GenZ Ignite © 2026 • Student Council Official
                         </div>
                     </motion.div>
                 )}

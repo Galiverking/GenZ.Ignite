@@ -116,9 +116,9 @@ export default function AdminDashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-black text-white tracking-tighter">
-                        ภาพรวมระบบ <span className="text-primary italic">DASHBOARD</span>
+                        ภาพรวม<span className="text-primary italic">สภานักเรียน</span>
                     </h1>
-                    <p className="text-gray-500 font-medium">ข้อมูลอัปเดตวินาทีต่อวินาทีจากระบบ Supabase ⚡</p>
+                    <p className="text-gray-500 font-medium">ข้อมูลอัปเดตแบบ Real-time จากระบบสภานักเรียน ⚡</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <button

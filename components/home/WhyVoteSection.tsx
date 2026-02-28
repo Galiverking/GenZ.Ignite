@@ -7,28 +7,28 @@ const REASONS = [
     {
         icon: Zap,
         title: "รวดเร็ว (Fast Action)",
-        description: "ทุกปัญหาที่แจ้งผ่านระบบ จะได้รับการตอบรับและเริ่มดำเนินการภายใน 24 ชั่วโมง",
+        description: "ทุกปัญหาที่แจ้งผ่านระบบ ได้รับการตอบรับและเริ่มดำเนินการภายใน 24 ชั่วโมง",
         color: "text-primary",
         bg: "bg-primary/10",
     },
     {
         icon: ShieldCheck,
         title: "โปร่งใส (Transparency)",
-        description: "เปิดเผยงบประมาณและขั้นตอนการดำเนินงานนโยบายแบบ Real-time บนเว็บไซต์",
+        description: "เปิดเผยงบประมาณและขั้นตอนการดำเนินงานนโยบายแบบ Real-time บนเว็บไซต์นี้",
         color: "text-secondary",
         bg: "bg-secondary/10",
     },
     {
         icon: HeartPulse,
         title: "ใส่ใจ (Empathy)",
-        description: "เน้นนโยบายที่พัฒนาคุณภาพชีวิตนักเรียนจริงๆ จากเสียงบ่นในโรงอาหารสู่การแก้ไข",
+        description: "นโยบายที่พัฒนาคุณภาพชีวิตนักเรียนจริงๆ จากเสียงร้องเรียน สู่การแก้ไขที่เป็นรูปธรรม",
         color: "text-primary",
         bg: "bg-primary/10",
     },
     {
         icon: Rocket,
         title: "ล้ำสมัย (Innovation)",
-        description: "ใช้เทคโนโลยีเข้ามาจัดการระบบสภานักเรียน ให้เข้าถึงง่ายและมีประสิทธิภาพที่สุด",
+        description: "ใช้เทคโนโลยีจัดการระบบสภานักเรียน ให้เข้าถึงง่ายและมีประสิทธิภาพ — เว็บนี้คือตัวอย่าง",
         color: "text-secondary",
         bg: "bg-secondary/10",
     },
@@ -44,10 +44,10 @@ export default function WhyVoteSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         className="text-4xl md:text-5xl font-bold text-black mb-4"
                     >
-                        ทำไมต้องเลือก <span className="text-primary italic">เบอร์ 03?</span>
+                        พันธกิจ <span className="text-primary italic">ของเรา</span>
                     </motion.h2>
                     <p className="text-gray-500 text-lg">
-                        เราไม่ได้มาเพื่อขายฝัน แต่เรามาเพื่อเปลี่ยนระบบให้ดีขึ้น
+                        สิ่งที่สภานักเรียนยึดมั่นและปฏิบัติจริง ตั้งแต่วันแรกที่ได้รับเลือกตั้ง
                     </p>
                 </div>
 
@@ -73,6 +73,6 @@ export default function WhyVoteSection() {
                     ))}
                 </div>
             </div>
-        </section>
+        </section >
     );
 }

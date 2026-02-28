@@ -81,7 +81,7 @@ export default function TeamPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-5xl md:text-7xl font-bold text-black tracking-tight mb-6"
                     >
-                        ทีมงาน<span className="text-primary">ของเรา</span>
+                        ทีมงาน<span className="text-primary">สภานักเรียน</span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0 }}
@@ -89,7 +89,7 @@ export default function TeamPage() {
                         transition={{ delay: 0.2 }}
                         className="text-xl text-gray-500 max-w-2xl mx-auto"
                     >
-                        ผู้อยู่เบื้องหลังการเปลี่ยนแปลง และพร้อมรับฟังทุกเสียงของเพื่อนนักเรียน
+                        คณะกรรมการสภานักเรียนที่ได้รับเลือกตั้ง พร้อมทำงานเพื่อเพื่อนนักเรียนทุกคน
                     </motion.p>
                 </div>
             </section>

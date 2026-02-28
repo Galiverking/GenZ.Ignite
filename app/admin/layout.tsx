@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, FileText, Settings, LayoutDashboard, MessageSquare, LogOut, Search, Bell, Loader2, ShieldAlert } from "lucide-react";
+import { Users, FileText, Settings, LayoutDashboard, MessageSquare, LogOut, Search, Bell, Loader2, ShieldAlert, Megaphone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -52,6 +52,7 @@ export default function AdminLayout({
 
     const navItems = [
         { name: "ภาพรวม", path: "/admin", icon: LayoutDashboard },
+        { name: "ข่าวสาร/ประชาสัมพันธ์", path: "/admin/announcements", icon: Megaphone },
         { name: "จัดการนโยบาย", path: "/admin/policies", icon: FileText },
         { name: "จัดการสมาชิก", path: "/admin/members", icon: Users },
         { name: "เรื่องร้องเรียน", path: "/admin/complaints", icon: MessageSquare },

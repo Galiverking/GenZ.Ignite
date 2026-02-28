@@ -16,8 +16,8 @@ const anuphan = Anuphan({
 });
 
 export const metadata: Metadata = {
-    title: "GenZ Ignite",
-    description: "Empowering Gen Z to shape the future.",
+    title: "สภานักเรียน GenZ Ignite",
+    description: "เว็บไซต์สภานักเรียนอย่างเป็นทางการ — GenZ Ignite | ติดตามนโยบาย ข่าวสาร และแจ้งเรื่องร้องเรียน",
 };
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="th">
             <body className={`${ibmPlexSansThai.variable} ${anuphan.variable} font-sans antialiased text-white bg-secondary`}>
                 <Navbar />
                 <main className="min-h-screen pt-20">
