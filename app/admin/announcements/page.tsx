@@ -40,6 +40,7 @@ export default function AdminAnnouncementsPage() {
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const [actionError, setActionError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         title: "",
         content: "",
@@ -89,6 +90,7 @@ export default function AdminAnnouncementsPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
+        setActionError(null);
 
         const payload = {
             title: formData.title,
@@ -97,11 +99,20 @@ export default function AdminAnnouncementsPage() {
             image_url: formData.image_url || null,
             is_pinned: formData.is_pinned,
         };
-
+        let err = null;
         if (editingId) {
-            await supabase.from("announcements").update(payload).eq("id", editingId);
+            const { error } = await supabase.from("announcements").update(payload).eq("id", editingId);
+            err = error;
         } else {
-            await supabase.from("announcements").insert([payload]);
+            const { error } = await supabase.from("announcements").insert([payload]);
+            err = error;
+        }
+
+        if (err) {
+            console.error("Supabase Error:", err);
+            setActionError(err.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูล (อาจเกี่ยวกับ RLS Policy)");
+            setSaving(false);
+            return;
         }
 
         setSaving(false);
@@ -111,12 +122,21 @@ export default function AdminAnnouncementsPage() {
 
     const handleDelete = async (id: string) => {
         if (!confirm("ต้องการลบข่าวนี้จริงหรือไม่?")) return;
-        await supabase.from("announcements").delete().eq("id", id);
+        const { error } = await supabase.from("announcements").delete().eq("id", id);
+        if (error) {
+            console.error("Delete Error:", error);
+            alert("ลบไม่สำเร็จ: " + error.message);
+            return;
+        }
         fetchData();
     };
 
     const handleTogglePin = async (id: string, currentPin: boolean) => {
-        await supabase.from("announcements").update({ is_pinned: !currentPin }).eq("id", id);
+        const { error } = await supabase.from("announcements").update({ is_pinned: !currentPin }).eq("id", id);
+        if (error) {
+            alert("อัปเดตสถานะการปักหมุดไม่สำเร็จ: " + error.message);
+            return;
+        }
         fetchData();
     };
 
@@ -171,6 +191,13 @@ export default function AdminAnnouncementsPage() {
                                 <X size={20} />
                             </button>
                         </div>
+
+                        {actionError && (
+                            <div className="mb-6 bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-xl text-sm font-bold">
+                                <p>เกิดข้อผิดพลาด: {actionError}</p>
+                                <p className="text-xs mt-1 font-normal opacity-80">โปรดตรวจสอบแน่ใจว่าได้ตั้งค่า Policy (RLS) ให้ตารางสามารถ Insert/Update ได้ (รันสคริปต์ 02_enable_admin_writes.sql ได้จาก Supabase SQL Editor)</p>
+                            </div>
+                        )}
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div>

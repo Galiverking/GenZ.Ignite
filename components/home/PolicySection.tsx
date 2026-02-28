@@ -15,9 +15,9 @@ export default function PolicySection() {
             // Mock data for initial render until Supabase is populated/connected
             // This ensures the UI looks good immediately for the user
             const mockData: Policy[] = [
-                { id: 1, title: 'ซ่อมพัดลมอาคาร 5', description: 'ดำเนินการซ่อมพัดลมที่ชำรุด 12 ตัว', category: 'อาคารสถานที่', status: 'in_progress', progress: 60 },
-                { id: 2, title: 'เพิ่มปลั๊กไฟโรงอาหาร', description: 'ติดตั้งจุดชาร์จไฟเพิ่ม 20 จุด', category: 'โครงสร้างพื้นฐาน', status: 'completed', progress: 100 },
-                { id: 3, title: 'จัดงาน Sport Day 2024', description: 'เตรียมงานกีฬาสีประจำปี', category: 'กิจกรรม', status: 'pending', progress: 15 },
+                { id: '1', title: 'ซ่อมพัดลมอาคาร 5', description: 'ดำเนินการซ่อมพัดลมที่ชำรุด 12 ตัว', category: 'อาคารสถานที่', status: 'in_progress', progress: 60, image_url: '' },
+                { id: '2', title: 'เพิ่มปลั๊กไฟโรงอาหาร', description: 'ติดตั้งจุดชาร์จไฟเพิ่ม 20 จุด', category: 'โครงสร้างพื้นฐาน', status: 'completed', progress: 100, image_url: '' },
+                { id: '3', title: 'จัดงาน Sport Day 2024', description: 'เตรียมงานกีฬาสีประจำปี', category: 'กิจกรรม', status: 'pending', progress: 15, image_url: '' },
             ];
 
             const { data, error } = await supabase

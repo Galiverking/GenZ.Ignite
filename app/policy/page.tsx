@@ -13,13 +13,30 @@ export default function PolicyPage() {
 
     useEffect(() => {
         const fetchPolicies = async () => {
-            const { data } = await supabase
-                .from("policies")
-                .select("*")
-                .order("votes", { ascending: false });
+            try {
+                const { data, error } = await supabase
+                    .from("policies")
+                    .select("*")
+                    .order("votes", { ascending: false });
 
-            if (data) setPolicies(data);
-            setLoading(false);
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    setPolicies(data);
+                } else {
+                    setPolicies([
+                        { id: 1, title: "ซ่อมพัดลมอาคาร 5", description: "ดำเนินการซ่อมพัดลมที่ชำรุด 12 ตัว", category: "อาคารสถานที่", votes: 45, status: "completed", progress: 100 },
+                        { id: 2, title: "เพิ่มปลั๊กไฟโรงอาหาร", description: "ติดตั้งจุดชาร์จไฟเพิ่ม 20 จุด", category: "โครงสร้างพื้นฐาน", votes: 82, status: "in_progress", progress: 60 },
+                    ]);
+                }
+            } catch (err) {
+                console.error("Error fetching policies:", err);
+                setPolicies([
+                    { id: 1, title: "ซ่อมพัดลมอาคาร 5 (Offline Mode)", description: "ดำเนินการซ่อมพัดลมที่ชำรุด 12 ตัว", category: "อาคารสถานที่", votes: 45, status: "completed", progress: 100 },
+                ]);
+            } finally {
+                setLoading(false);
+            }
         };
 
         const savedVotes = localStorage.getItem("genz_voted_policies");

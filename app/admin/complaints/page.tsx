@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Check, Clock, RefreshCcw, Search, Filter, MessageCircle, User, Calendar, MoreHorizontal } from "lucide-react";
+import { Check, Clock, RefreshCcw, Search, Filter, MessageCircle, User, Calendar, MoreHorizontal, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
 
@@ -10,6 +10,8 @@ export default function ComplaintsManage() {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const [replyingTo, setReplyingTo] = useState<any | null>(null);
+    const [replyText, setReplyText] = useState("");
 
     // Fetch data
     const fetchComplaints = async () => {
@@ -33,6 +35,31 @@ export default function ComplaintsManage() {
     }, []);
 
     // Update status function
+    const submitReply = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!replyingTo) return;
+
+        const updatedData = {
+            status: "resolved",
+            admin_reply: replyText,
+            resolved_at: new Date().toISOString()
+        };
+
+        setComplaints((prev) =>
+            prev.map((c) => (c.id === replyingTo.id ? { ...c, ...updatedData } : c))
+        );
+
+        const { error } = await supabase.from("complaints").update(updatedData).eq("id", replyingTo.id);
+
+        if (error) {
+            console.error("Error updating status:", error);
+            fetchComplaints(); // Revert on error
+        }
+
+        setReplyingTo(null);
+        setReplyText("");
+    };
+
     const updateStatus = async (id: number, newStatus: string) => {
         // Optimistic Update
         setComplaints((prev) =>
@@ -150,6 +177,12 @@ export default function ComplaintsManage() {
                                                 <p className="text-xs text-gray-500 line-clamp-1 italic">
                                                     {c.message}
                                                 </p>
+                                                {c.status === 'resolved' && c.admin_reply && (
+                                                    <div className="mt-2 bg-white/5 border border-white/10 p-2 rounded-lg text-xs">
+                                                        <span className="text-secondary font-bold">ตอบกลับ: </span>
+                                                        <span className="text-gray-300">{c.admin_reply}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="p-6">
@@ -175,10 +208,10 @@ export default function ComplaintsManage() {
                                             <div className="flex items-center justify-end gap-2">
                                                 {c.status === "pending" ? (
                                                     <button
-                                                        onClick={() => updateStatus(c.id, "resolved")}
+                                                        onClick={() => setReplyingTo(c)}
                                                         className="bg-secondary text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase italic tracking-wider hover:bg-red-600 transition-all shadow-lg shadow-secondary/20 active:scale-95"
                                                     >
-                                                        ทำเสร็จแล้ว
+                                                        ตอบกลับ
                                                     </button>
                                                 ) : (
                                                     <button
@@ -217,6 +250,62 @@ export default function ComplaintsManage() {
                     </div>
                 )}
             </div>
+
+            {/* Reply Modal */}
+            <AnimatePresence>
+                {replyingTo && (
+                    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex justify-center items-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0b0f14] border border-white/10 rounded-[3rem] w-full max-w-lg p-10 shadow-2xl relative"
+                        >
+                            <button
+                                onClick={() => setReplyingTo(null)}
+                                className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"
+                            >
+                                <X size={28} />
+                            </button>
+
+                            <h2 className="text-xl font-black mb-2 text-white italic tracking-tighter uppercase">
+                                ตอบกลับเรื่องร้องเรียน
+                            </h2>
+                            <p className="text-sm text-gray-400 mb-6 font-bold">{replyingTo.topic}</p>
+
+                            <form onSubmit={submitReply} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">ข้อความตอบกลับเพื่ออัปเดตผู้ร้องเรียน</label>
+                                    <textarea
+                                        required
+                                        rows={4}
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-secondary transition-all text-sm resize-none"
+                                        placeholder="ดำเนินการซ่อมแซมและประสานงานอาจารย์เรียบร้อยแล้วค่ะ..."
+                                    />
+                                </div>
+
+                                <div className="pt-2 flex gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setReplyingTo(null)}
+                                        className="flex-1 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-gray-400 font-bold transition-all"
+                                    >
+                                        ยกเลิก
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-[2] py-4 rounded-2xl bg-secondary hover:bg-red-600 text-white font-black italic shadow-lg shadow-secondary/20 transition-all active:scale-95"
+                                    >
+                                        เปลี่ยนสถานะเป็น "แก้ไขแล้ว"
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

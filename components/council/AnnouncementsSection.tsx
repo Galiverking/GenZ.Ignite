@@ -37,6 +37,8 @@ export default function AnnouncementsSection() {
                     .order("created_at", { ascending: false })
                     .limit(5);
 
+                if (error) throw error;
+
                 if (data && data.length > 0) {
                     setAnnouncements(data);
                 } else {
@@ -58,17 +60,10 @@ export default function AnnouncementsSection() {
                             is_pinned: false,
                             created_at: new Date(Date.now() - 86400000).toISOString(),
                         },
-                        {
-                            id: "3",
-                            title: "ซ่อมพัดลมอาคาร 5 เสร็จเรียบร้อย",
-                            content: "สภานักเรียนได้ประสานงานกับฝ่ายอาคารสถานที่ ดำเนินการซ่อมพัดลมชำรุดทั้ง 12 ตัวเรียบร้อยแล้ว",
-                            category: "ผลงานสภา",
-                            is_pinned: false,
-                            created_at: new Date(Date.now() - 172800000).toISOString(),
-                        },
                     ]);
                 }
-            } catch {
+            } catch (err) {
+                console.error("Error fetching announcements:", err);
                 // Table might not exist yet, use mock data
                 setAnnouncements([
                     {
@@ -78,18 +73,11 @@ export default function AnnouncementsSection() {
                         category: "ข่าวด่วน",
                         is_pinned: true,
                         created_at: new Date().toISOString(),
-                    },
-                    {
-                        id: "2",
-                        title: "กำหนดการ Sport Day 2569",
-                        content: "งานกีฬาสีประจำปีจะจัดขึ้นวันที่ 15-17 มีนาคม 2569",
-                        category: "กิจกรรม",
-                        is_pinned: false,
-                        created_at: new Date(Date.now() - 86400000).toISOString(),
-                    },
+                    }
                 ]);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         fetchAnnouncements();
@@ -154,8 +142,8 @@ export default function AnnouncementsSection() {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
                             className={`group relative bg-white/5 border rounded-[2rem] p-6 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-500 ${item.is_pinned
-                                    ? "border-primary/30 col-span-1 md:col-span-2 lg:col-span-2"
-                                    : "border-white/10 hover:border-primary/20"
+                                ? "border-primary/30 col-span-1 md:col-span-2 lg:col-span-2"
+                                : "border-white/10 hover:border-primary/20"
                                 }`}
                         >
                             {/* Pinned indicator */}

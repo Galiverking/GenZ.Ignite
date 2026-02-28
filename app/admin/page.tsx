@@ -22,6 +22,8 @@ import {
     Tooltip,
     ResponsiveContainer
 } from 'recharts';
+import { StatCard } from "@/components/admin/StatCard";
+import { ActivityItem } from "@/components/admin/ActivityItem";
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({
@@ -280,51 +282,4 @@ export default function AdminDashboard() {
     );
 }
 
-function StatCard({ title, value, icon: Icon, color, label }: any) {
-    const colors: any = {
-        primary: "from-primary/20 to-transparent text-primary",
-        secondary: "from-secondary/20 to-transparent text-secondary",
-        accent: "from-accent/20 to-transparent text-accent",
-        red: "from-red-500/20 to-transparent text-red-500"
-    };
 
-    return (
-        <motion.div
-            whileHover={{ y: -5 }}
-            className="bg-white/5 border border-white/10 p-6 rounded-[2rem] backdrop-blur-xl relative overflow-hidden group"
-        >
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colors[color]} opacity-50 blur-2xl group-hover:scale-150 transition-transform duration-500`} />
-
-            <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className={`p-3 rounded-2xl bg-white/5 border border-white/10 ${colors[color].split(' ').pop()}`}>
-                    <Icon size={24} />
-                </div>
-            </div>
-
-            <div className="relative z-10">
-                <h3 className="text-gray-500 text-sm font-bold">{title}</h3>
-                <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-black text-white tracking-tighter italic">{value}</p>
-                </div>
-                <p className="text-[10px] text-gray-600 uppercase font-bold tracking-widest mt-1">{label}</p>
-            </div>
-        </motion.div>
-    );
-}
-
-function ActivityItem({ icon: Icon, color, title, time, desc }: any) {
-    return (
-        <div className="flex gap-4 group">
-            <div className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 transition-transform group-hover:scale-110 ${color}`}>
-                <Icon size={20} />
-            </div>
-            <div className="flex-1 min-w-0 text-left">
-                <div className="flex justify-between items-center mb-1">
-                    <h4 className="text-sm font-bold text-white truncate">{title}</h4>
-                    <span className="text-[10px] text-gray-600 font-bold shrink-0">{time}</span>
-                </div>
-                <p className="text-xs text-gray-500 truncate">{desc}</p>
-            </div>
-        </div>
-    );
-}

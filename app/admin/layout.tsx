@@ -7,8 +7,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { clsx } from "clsx";
+import NotificationBell from "@/components/admin/NotificationBell";
 
 export default function AdminLayout({
+
     children,
 }: {
     children: React.ReactNode;
@@ -206,10 +208,7 @@ export default function AdminLayout({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:text-white transition-all">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
-                        </button>
+                        <NotificationBell />
                     </div>
                 </header>
 

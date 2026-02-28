@@ -33,27 +33,38 @@ export default function CouncilHero() {
 
     useEffect(() => {
         const fetchStats = async () => {
-            const [policiesRes, membersRes, completedRes] = await Promise.all([
-                supabase.from("policies").select("*", { count: "exact", head: true }),
-                supabase.from("members").select("*", { count: "exact", head: true }),
-                supabase.from("policies").select("*", { count: "exact", head: true }).eq("status", "completed"),
-            ]);
-
-            // Try to get announcements count (table may not exist yet)
-            let announcementsCount = 0;
             try {
-                const { count } = await supabase.from("announcements").select("*", { count: "exact", head: true });
-                announcementsCount = count || 0;
-            } catch {
-                announcementsCount = 0;
-            }
+                const [policiesRes, membersRes, completedRes] = await Promise.all([
+                    supabase.from("policies").select("*", { count: "exact", head: true }),
+                    supabase.from("members").select("*", { count: "exact", head: true }),
+                    supabase.from("policies").select("*", { count: "exact", head: true }).eq("status", "completed"),
+                ]);
 
-            setStats({
-                policies: policiesRes.count || 0,
-                members: membersRes.count || 0,
-                completedPolicies: completedRes.count || 0,
-                announcements: announcementsCount,
-            });
+                // Try to get announcements count (table may not exist yet)
+                let announcementsCount = 0;
+                try {
+                    const { count } = await supabase.from("announcements").select("*", { count: "exact", head: true });
+                    announcementsCount = count || 0;
+                } catch {
+                    announcementsCount = 0;
+                }
+
+                setStats({
+                    policies: policiesRes.count || 0,
+                    members: membersRes.count || 0,
+                    completedPolicies: completedRes.count || 0,
+                    announcements: announcementsCount,
+                });
+            } catch (err) {
+                console.error("Error fetching stats:", err);
+                // Fallback to zeros (already default, but good to be explicit)
+                setStats({
+                    policies: 0,
+                    members: 0,
+                    completedPolicies: 0,
+                    announcements: 0,
+                });
+            }
         };
 
         fetchStats();

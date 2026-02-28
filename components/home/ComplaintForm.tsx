@@ -4,10 +4,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { Send, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 export default function ComplaintForm() {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+    const [trackId, setTrackId] = useState<string | null>(null);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -21,8 +23,8 @@ export default function ComplaintForm() {
         e.preventDefault();
         setLoading(true);
 
-        // Send data to Supabase
-        const { error } = await supabase.from("complaints").insert([formData]);
+        // Send data to Supabase and return the generated track_id
+        const { data, error } = await supabase.from("complaints").insert([formData]).select('track_id').single();
 
         setLoading(false);
 
@@ -31,11 +33,18 @@ export default function ComplaintForm() {
             setStatus("error");
         } else {
             setStatus("success");
-            // Reset form
+            if (data?.track_id) {
+                setTrackId(data.track_id);
+            }
+            // Reset form for next time
             setFormData({ topic: "", category: "ทั่วไป", message: "", contact: "" });
-            // Return to idle state after 3 seconds
-            setTimeout(() => setStatus("idle"), 3000);
+            // Note: Removed the 3 second timeout so the user has time to copy the Track ID
         }
+    };
+
+    const handleReset = () => {
+        setStatus("idle");
+        setTrackId(null);
     };
 
     return (
@@ -79,9 +88,24 @@ export default function ComplaintForm() {
                                     <CheckCircle2 size={40} color="white" />
                                 </div>
                                 <h3 className="text-2xl font-bold">ได้รับเรื่องแล้ว!</h3>
-                                <p className="text-gray-300">
-                                    ขอบคุณที่ช่วยกันทำให้โรงเรียนดีขึ้น
+                                <p className="text-gray-300 mt-2 text-sm">
+                                    เรื่องของคุณรหัสอ้างอิง:
                                 </p>
+                                <div className="bg-black/50 border border-white/10 text-primary font-mono text-sm px-4 py-2 rounded-lg mt-2 mb-2">
+                                    {trackId || "กำลังประมวลผล..."}
+                                </div>
+                                <Link
+                                    href="/report/track"
+                                    className="text-xs text-secondary font-bold hover:text-white underline underline-offset-4 transition-colors mb-6 block"
+                                >
+                                    ตรวจสอบสถานะเรื่องร้องเรียน
+                                </Link>
+                                <button
+                                    onClick={handleReset}
+                                    className="text-sm text-gray-400 hover:text-white underline underline-offset-4 transition-colors"
+                                >
+                                    ส่งเรื่องร้องเรียนอื่นเพิ่มเติม
+                                </button>
                             </motion.div>
                         ) : (
                             <motion.form
@@ -92,6 +116,12 @@ export default function ComplaintForm() {
                                 onSubmit={handleSubmit}
                                 className="space-y-4"
                             >
+                                {status === "error" && (
+                                    <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-xl text-sm font-bold mb-4">
+                                        เกิดข้อผิดพลาดในการส่งเรื่องร้องเรียน โปรดลองใหม่อีกครั้ง หรือติดต่อผู้ดูแลระบบเพื่อเปิด RLS
+                                    </div>
+                                )}
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-1">
                                         เรื่องที่แจ้ง

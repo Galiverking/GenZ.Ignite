@@ -17,21 +17,34 @@ export default function Home() {
 
     useEffect(() => {
         const fetchPolicies = async () => {
-            const { data } = await supabase
-                .from("policies")
-                .select("*")
-                .order("id", { ascending: true });
+            try {
+                const { data, error } = await supabase
+                    .from("policies")
+                    .select("*")
+                    .order("id", { ascending: true });
 
-            if (data && data.length > 0) {
-                setPolicies(data);
-            } else {
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    setPolicies(data);
+                } else {
+                    // Fallback to mock data if empty
+                    setPolicies([
+                        { id: 1, title: "ซ่อมพัดลมอาคาร 5", description: "ดำเนินการซ่อมพัดลมที่ชำรุด 12 ตัว", category: "อาคารสถานที่", votes: 45 },
+                        { id: 2, title: "เพิ่มปลั๊กไฟโรงอาหาร", description: "ติดตั้งจุดชาร์จไฟเพิ่ม 20 จุด", category: "โครงสร้างพื้นฐาน", votes: 82 },
+                        { id: 3, title: "จัดงาน Sport Day 2024", description: "เตรียมงานกีฬาสีประจำปี", category: "กิจกรรม", votes: 12 },
+                    ]);
+                }
+            } catch (err) {
+                console.error("Error fetching policies:", err);
+                // Fallback on error
                 setPolicies([
                     { id: 1, title: "ซ่อมพัดลมอาคาร 5", description: "ดำเนินการซ่อมพัดลมที่ชำรุด 12 ตัว", category: "อาคารสถานที่", votes: 45 },
                     { id: 2, title: "เพิ่มปลั๊กไฟโรงอาหาร", description: "ติดตั้งจุดชาร์จไฟเพิ่ม 20 จุด", category: "โครงสร้างพื้นฐาน", votes: 82 },
-                    { id: 3, title: "จัดงาน Sport Day 2024", description: "เตรียมงานกีฬาสีประจำปี", category: "กิจกรรม", votes: 12 },
                 ]);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         fetchPolicies();
