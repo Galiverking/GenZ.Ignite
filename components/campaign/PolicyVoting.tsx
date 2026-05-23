@@ -19,10 +19,7 @@ export default function PolicyVoting({ policies }: { policies: any[] }) {
         setVotedIds([...votedIds, id]);
 
         // 2. Send to Database
-        const { error } = await supabase
-            .from("policies")
-            .update({ votes: (currentVotes || 0) + 1 })
-            .eq("id", id);
+        const { error } = await supabase.rpc("increment_policy_vote", { policy_id: id });
 
         if (error) {
             console.error("Error voting:", error);
@@ -84,7 +81,7 @@ export default function PolicyVoting({ policies }: { policies: any[] }) {
                                         className={votedIds.includes(policy.id) ? "fill-primary text-primary" : "text-gray-400 group-hover:text-white"}
                                         size={20}
                                     />
-                                    <span className="font-mono text-xl">{((policy.votes || 0) + (votedIds.includes(policy.id) ? 1 : 0))}</span>
+                                    <span className="font-mono text-xl">{policy.votes || 0}</span>
                                 </div>
                             </button>
                         </motion.div>

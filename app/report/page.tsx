@@ -4,10 +4,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { Send, CheckCircle2, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 export default function ReportPage() {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+    const [trackId, setTrackId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         topic: "",
         category: "ทั่วไป",
@@ -19,7 +21,11 @@ export default function ReportPage() {
         e.preventDefault();
         setLoading(true);
 
-        const { error } = await supabase.from("complaints").insert([formData]);
+        const { data, error } = await supabase
+            .from("complaints")
+            .insert([formData])
+            .select("track_id")
+            .single();
 
         setLoading(false);
 
@@ -29,9 +35,16 @@ export default function ReportPage() {
             setTimeout(() => setStatus("idle"), 3000);
         } else {
             setStatus("success");
+            if (data?.track_id) {
+                setTrackId(data.track_id);
+            }
             setFormData({ topic: "", category: "ทั่วไป", message: "", contact: "" });
-            setTimeout(() => setStatus("idle"), 3000);
         }
+    };
+
+    const handleReset = () => {
+        setStatus("idle");
+        setTrackId(null);
     };
 
     return (
@@ -83,7 +96,24 @@ export default function ReportPage() {
                                     <CheckCircle2 size={40} color="white" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-white">ได้รับเรื่องแล้ว!</h3>
-                                <p className="text-gray-300">ขอบคุณที่ช่วยกันทำให้โรงเรียนดีขึ้น</p>
+                                <p className="text-gray-300 mt-2 text-sm">
+                                    เรื่องของคุณรหัสอ้างอิง:
+                                </p>
+                                <div className="bg-black/50 border border-white/10 text-primary font-mono text-sm px-4 py-2 rounded-lg mt-2 mb-2">
+                                    {trackId || "กำลังประมวลผล..."}
+                                </div>
+                                <Link
+                                    href="/report/track"
+                                    className="text-xs text-secondary font-bold hover:text-white underline underline-offset-4 transition-colors mb-6 block"
+                                >
+                                    ตรวจสอบสถานะเรื่องร้องเรียน
+                                </Link>
+                                <button
+                                    onClick={handleReset}
+                                    className="text-sm text-gray-400 hover:text-white underline underline-offset-4 transition-colors"
+                                >
+                                    ส่งเรื่องร้องเรียนอื่นเพิ่มเติม
+                                </button>
                             </motion.div>
                         ) : status === "error" ? (
                             <motion.div

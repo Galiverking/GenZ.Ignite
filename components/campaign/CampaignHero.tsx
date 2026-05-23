@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function CampaignHero() {
     const [timeLeft, setTimeLeft] = useState({
@@ -11,13 +12,43 @@ export default function CampaignHero() {
         seconds: 0,
     });
 
-    // Target election date: 18 กุมภาพันธ์ 2569 (2026-02-18)
+    const [settings, setSettings] = useState({
+        party_name: "GenZ Ignite",
+        candidate_number: "03",
+        election_date: "2026-02-18T08:00:00+07:00",
+        slogan: "สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์",
+    });
+
     useEffect(() => {
-        const electionDate = new Date("2026-02-18T08:00:00");
+        const fetchSettings = async () => {
+            try {
+                const { data } = await supabase
+                    .from("site_settings")
+                    .select("*")
+                    .eq("id", 1)
+                    .maybeSingle();
+
+                if (data) {
+                    setSettings({
+                        party_name: data.party_name || "GenZ Ignite",
+                        candidate_number: data.candidate_number || "03",
+                        election_date: data.election_date || "2026-02-18T08:00:00+07:00",
+                        slogan: data.slogan || "สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์",
+                    });
+                }
+            } catch (e) {
+                console.error("Error fetching settings in CampaignHero:", e);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    useEffect(() => {
+        const targetDate = new Date(settings.election_date);
 
         const timer = setInterval(() => {
             const now = new Date();
-            const difference = electionDate.getTime() - now.getTime();
+            const difference = targetDate.getTime() - now.getTime();
 
             if (difference > 0) {
                 setTimeLeft({
@@ -26,10 +57,17 @@ export default function CampaignHero() {
                     minutes: Math.floor((difference / 1000 / 60) % 60),
                     seconds: Math.floor((difference / 1000) % 60),
                 });
+            } else {
+                setTimeLeft({
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                });
             }
         }, 1000);
         return () => clearInterval(timer);
-    }, []);
+    }, [settings.election_date]);
 
     return (
         <section className="h-screen flex flex-col justify-center items-center bg-black text-white px-4 text-center relative overflow-hidden">
@@ -60,7 +98,7 @@ export default function CampaignHero() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-[12rem] md:text-[18rem] font-bold leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-primary to-white drop-shadow-[0_20px_50px_rgba(255,102,0,0.3)] select-none"
                 >
-                    03
+                    {settings.candidate_number}
                 </motion.h1>
 
                 <motion.h2
@@ -69,8 +107,8 @@ export default function CampaignHero() {
                     transition={{ delay: 0.4 }}
                     className="text-2xl md:text-5xl font-bold mb-12 text-gray-200 tracking-tight"
                 >
-                    พรรค GenZ Ignite <br />
-                    <span className="text-primary italic">"สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์"</span>
+                    พรรค {settings.party_name} <br />
+                    <span className="text-primary italic">"{settings.slogan}"</span>
                 </motion.h2>
 
                 {/* Countdown Timer */}

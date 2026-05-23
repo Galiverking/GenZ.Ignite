@@ -57,10 +57,7 @@ export default function PolicyPage() {
         localStorage.setItem("genz_voted_policies", JSON.stringify(newVotedIds));
 
         // DB Update
-        await supabase
-            .from("policies")
-            .update({ votes: (currentVotes || 0) + 1 })
-            .eq("id", id);
+        await supabase.rpc("increment_policy_vote", { policy_id: id });
     };
 
     const getStatusIcon = (status: string) => {

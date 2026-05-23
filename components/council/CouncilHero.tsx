@@ -30,14 +30,20 @@ export default function CouncilHero() {
         completedPolicies: 0,
         announcements: 0,
     });
+    const [settings, setSettings] = useState({
+        party_name: "GenZ Ignite",
+        slogan: "สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์",
+        slogan_accent: "เสียงของคุณ คือภารกิจของเรา",
+    });
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [policiesRes, membersRes, completedRes] = await Promise.all([
+                const [policiesRes, membersRes, completedRes, settingsRes] = await Promise.all([
                     supabase.from("policies").select("*", { count: "exact", head: true }),
                     supabase.from("members").select("*", { count: "exact", head: true }),
                     supabase.from("policies").select("*", { count: "exact", head: true }).eq("status", "completed"),
+                    supabase.from("site_settings").select("*").eq("id", 1).maybeSingle(),
                 ]);
 
                 // Try to get announcements count (table may not exist yet)
@@ -55,9 +61,16 @@ export default function CouncilHero() {
                     completedPolicies: completedRes.count || 0,
                     announcements: announcementsCount,
                 });
+
+                if (settingsRes.data) {
+                    setSettings({
+                        party_name: settingsRes.data.party_name || "GenZ Ignite",
+                        slogan: settingsRes.data.slogan || "สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์",
+                        slogan_accent: settingsRes.data.slogan_accent || "เสียงของคุณ คือภารกิจของเรา",
+                    });
+                }
             } catch (err) {
                 console.error("Error fetching stats:", err);
-                // Fallback to zeros (already default, but good to be explicit)
                 setStats({
                     policies: 0,
                     members: 0,
@@ -104,7 +117,7 @@ export default function CouncilHero() {
                 >
                     <img
                         src="/logo.png"
-                        alt="สภานักเรียน GenZ Ignite Logo"
+                        alt={`สภานักเรียน ${settings.party_name} Logo`}
                         className="w-full h-full object-contain drop-shadow-[0_0_40px_rgba(255,102,0,0.4)]"
                     />
                 </motion.div>
@@ -131,7 +144,7 @@ export default function CouncilHero() {
                         สภานักเรียน
                     </span>
                     <br />
-                    <span className="text-white">GenZ Ignite</span>
+                    <span className="text-white">{settings.party_name}</span>
                 </motion.h1>
 
                 {/* Tagline */}
@@ -141,9 +154,9 @@ export default function CouncilHero() {
                     transition={{ delay: 0.5 }}
                     className="text-xl md:text-2xl text-gray-400 mb-12 font-medium max-w-2xl mx-auto"
                 >
-                    สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์
+                    {settings.slogan}
                     <br />
-                    <span className="text-primary italic font-bold">&ldquo;เสียงของคุณ คือภารกิจของเรา&rdquo;</span>
+                    <span className="text-primary italic font-bold">&ldquo;{settings.slogan_accent}&rdquo;</span>
                 </motion.p>
 
                 {/* CTA Buttons */}

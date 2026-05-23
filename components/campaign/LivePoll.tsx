@@ -66,10 +66,7 @@ export default function LivePoll() {
     const handleVote = async (id: number, currentVotes: number) => {
         if (isVoted) return;
         setIsVoted(true);
-        await supabase
-            .from("polls")
-            .update({ votes: currentVotes + 1 })
-            .eq("id", id);
+        await supabase.rpc("increment_poll_vote", { poll_id: id });
     };
 
     return (

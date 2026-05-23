@@ -33,15 +33,12 @@ export default function TrackComplaintPage() {
 
         try {
             const { data, error: fetchError } = await supabase
-                .from("complaints")
-                .select("*")
-                .eq("track_id", trackId.trim())
-                .single();
+                .rpc("get_complaint_by_track_id", { input_track_id: trackId.trim() });
 
-            if (fetchError || !data) {
+            if (fetchError || !data || data.length === 0) {
                 setError("ไม่พบเรื่องร้องเรียนจากรหัสอ้างอิงนี้");
             } else {
-                setResult(data);
+                setResult(data[0]);
             }
         } catch (err) {
             setError("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
