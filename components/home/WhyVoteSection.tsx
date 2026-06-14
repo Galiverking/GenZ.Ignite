@@ -36,7 +36,7 @@ const REASONS = [
 
 export default function WhyVoteSection() {
     return (
-        <section className="py-24 bg-white overflow-hidden">
+        <section className="py-24 bg-white/5 overflow-hidden">
             <div className="max-w-6xl mx-auto px-4">
                 <div className="text-center mb-16">
                     <motion.h2
@@ -58,14 +58,14 @@ export default function WhyVoteSection() {
                             initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="flex gap-6 p-8 rounded-[2.5rem] bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all group"
+                            className="flex gap-6 p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:bg-white/10 hover:shadow-2xl hover:shadow-primary/5 transition-all group"
                         >
                             <div className={`shrink-0 w-16 h-16 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                 <item.icon size={32} />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-bold mb-2 text-gray-900">{item.title}</h3>
-                                <p className="text-gray-600 leading-relaxed">
+                                <h3 className="text-2xl font-bold mb-2 text-white">{item.title}</h3>
+                                <p className="text-gray-400 leading-relaxed">
                                     {item.description}
                                 </p>
                             </div>

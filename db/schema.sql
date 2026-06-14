@@ -18,8 +18,12 @@ CREATE POLICY "Public policies are viewable by everyone"
   ON policies FOR SELECT
   USING (true);
 
--- Allow write access only to authenticated admins (placeholder)
--- CREATE POLICY "Admins can insert policies"
---   ON policies FOR INSERT
---   TO authenticated
---   WITH CHECK (auth.role() = 'admin');
+-- Allow write access only to authenticated admins
+CREATE POLICY "Admins can insert policies"
+  ON policies FOR INSERT
+  WITH CHECK (auth.role() = 'admin');
+
+-- Allow update access only to authenticated admins
+CREATE POLICY "Admins can update policies"
+  ON policies FOR UPDATE
+  WITH CHECK (auth.role() = 'admin');

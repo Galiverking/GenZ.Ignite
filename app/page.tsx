@@ -9,6 +9,7 @@ import TeamSection from "@/components/team/TeamSection";
 import PolicyVoting from "@/components/campaign/PolicyVoting";
 import LivePoll from "@/components/campaign/LivePoll";
 import ComplaintForm from "@/components/home/ComplaintForm";
+import PlatformStats from "@/components/home/PlatformStats";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
@@ -76,6 +77,9 @@ export default function Home() {
 
             {/* 7. แจ้งเรื่องร้องเรียน */}
             <ComplaintForm />
+
+            {/* 8. ผลงานของสภา */}
+            <PlatformStats />
         </div>
     );
 }
