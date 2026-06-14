@@ -39,11 +39,10 @@ export default function CouncilHero() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [policiesRes, membersRes, completedRes, settingsRes] = await Promise.all([
+                const [policiesRes, membersRes, completedRes] = await Promise.all([
                     supabase.from("policies").select("*", { count: "exact", head: true }),
                     supabase.from("members").select("*", { count: "exact", head: true }),
                     supabase.from("policies").select("*", { count: "exact", head: true }).eq("status", "completed"),
-                    supabase.from("site_settings").select("*").eq("id", 1).maybeSingle(),
                 ]);
 
                 // Try to get announcements count (table may not exist yet)
@@ -55,20 +54,26 @@ export default function CouncilHero() {
                     announcementsCount = 0;
                 }
 
+                // Try to get site settings (table may not exist yet)
+                try {
+                    const settingsRes = await supabase.from("site_settings").select("*").eq("id", 1).maybeSingle();
+                    if (settingsRes.data) {
+                        setSettings({
+                            party_name: settingsRes.data.party_name || "GenZ Ignite",
+                            slogan: settingsRes.data.slogan || "สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์",
+                            slogan_accent: settingsRes.data.slogan_accent || "เสียงของคุณ คือภารกิจของเรา",
+                        });
+                    }
+                } catch {
+                    // keep default settings
+                }
+
                 setStats({
                     policies: policiesRes.count || 0,
                     members: membersRes.count || 0,
                     completedPolicies: completedRes.count || 0,
                     announcements: announcementsCount,
                 });
-
-                if (settingsRes.data) {
-                    setSettings({
-                        party_name: settingsRes.data.party_name || "GenZ Ignite",
-                        slogan: settingsRes.data.slogan || "สภา GenZ คิดนอกกรอบ ตอบโจทย์ทุกไลฟ์สไตล์",
-                        slogan_accent: settingsRes.data.slogan_accent || "เสียงของคุณ คือภารกิจของเรา",
-                    });
-                }
             } catch (err) {
                 console.error("Error fetching stats:", err);
                 setStats({
