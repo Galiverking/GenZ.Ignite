@@ -19,7 +19,7 @@ interface StatItem {
 const STAT_DEFS: StatItem[] = [
     {
         icon: FileText,
-        end: 12,
+        end: 13,
         suffix: "นโยบาย",
         label: "กำลังดำเนินการและสำเร็จแล้ว",
         color: "text-primary",
@@ -28,16 +28,16 @@ const STAT_DEFS: StatItem[] = [
     },
     {
         icon: MessageSquare,
-        end: 47,
+        end: 2,
         suffix: "เรื่อง",
         label: "ร้องเรียนที่ได้รับการแก้ไข",
         color: "text-yellow-400",
         bg: "bg-yellow-400/10",
-        source: { table: "complaints", filter: { column: "status", value: "completed" } },
+        source: { table: "complaints", filter: { column: "status", value: "resolved" } },
     },
     {
         icon: Users,
-        end: 9,
+        end: 4,
         suffix: "คน",
         label: "คณะกรรมการสภานักเรียน",
         color: "text-emerald-400",
@@ -46,7 +46,7 @@ const STAT_DEFS: StatItem[] = [
     },
     {
         icon: BarChart3,
-        end: 24,
+        end: 8,
         suffix: "โพล",
         label: "สำรวจความคิดเห็นที่จัดไป",
         color: "text-purple-400",
