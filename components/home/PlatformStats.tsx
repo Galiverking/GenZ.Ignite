@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { FileText, MessageSquare, Users, BarChart3 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface StatItem {
     icon: React.ElementType;
@@ -11,9 +12,11 @@ interface StatItem {
     label: string;
     color: string;
     bg: string;
+    /** Supabase table and optional filter to compute count */
+    source: { table: string; filter?: { column: string; value: string } };
 }
 
-const STATS: StatItem[] = [
+const STAT_DEFS: StatItem[] = [
     {
         icon: FileText,
         end: 12,
@@ -21,6 +24,7 @@ const STATS: StatItem[] = [
         label: "กำลังดำเนินการและสำเร็จแล้ว",
         color: "text-primary",
         bg: "bg-primary/10",
+        source: { table: "policies" },
     },
     {
         icon: MessageSquare,
@@ -29,6 +33,7 @@ const STATS: StatItem[] = [
         label: "ร้องเรียนที่ได้รับการแก้ไข",
         color: "text-yellow-400",
         bg: "bg-yellow-400/10",
+        source: { table: "complaints", filter: { column: "status", value: "completed" } },
     },
     {
         icon: Users,
@@ -37,6 +42,7 @@ const STATS: StatItem[] = [
         label: "คณะกรรมการสภานักเรียน",
         color: "text-emerald-400",
         bg: "bg-emerald-400/10",
+        source: { table: "members" },
     },
     {
         icon: BarChart3,
@@ -45,6 +51,7 @@ const STATS: StatItem[] = [
         label: "สำรวจความคิดเห็นที่จัดไป",
         color: "text-purple-400",
         bg: "bg-purple-400/10",
+        source: { table: "polls" },
     },
 ];
 
@@ -70,6 +77,34 @@ function Counter({ end, duration = 2000 }: { end: number; duration?: number }) {
 }
 
 export default function PlatformStats() {
+    const [counts, setCounts] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            const results: Record<string, number> = {};
+
+            for (const stat of STAT_DEFS) {
+                try {
+                    let query = supabase.from(stat.source.table).select("*", {
+                        count: "exact",
+                        head: true,
+                    });
+                    if (stat.source.filter) {
+                        query = query.eq(stat.source.filter.column, stat.source.filter.value);
+                    }
+                    const { count } = await query;
+                    results[stat.source.table] = count ?? 0;
+                } catch {
+                    // keep fallback (stat.end) if table doesn't exist or query fails
+                }
+            }
+
+            setCounts(results);
+        };
+
+        fetchCounts();
+    }, []);
+
     return (
         <section className="py-24 bg-secondary overflow-hidden relative">
             {/* subtle background decoration */}
@@ -97,39 +132,42 @@ export default function PlatformStats() {
 
                 {/* Stats grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {STATS.map((stat, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.12, duration: 0.5 }}
-                            className="group relative p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-center"
-                        >
-                            {/* Icon */}
-                            <div
-                                className={`w-14 h-14 mx-auto mb-5 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}
+                    {STAT_DEFS.map((stat, index) => {
+                        const realValue = counts[stat.source.table] ?? stat.end;
+                        return (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.12, duration: 0.5 }}
+                                className="group relative p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-center"
                             >
-                                <stat.icon size={28} />
-                            </div>
+                                {/* Icon */}
+                                <div
+                                    className={`w-14 h-14 mx-auto mb-5 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform`}
+                                >
+                                    <stat.icon size={28} />
+                                </div>
 
-                            {/* Number */}
-                            <div className="text-5xl md:text-6xl font-black text-white mb-2 tabular-nums">
-                                <Counter end={stat.end} />
-                                <span className="text-2xl ml-1 text-gray-400">+</span>
-                            </div>
+                                {/* Number from Supabase, fallback to hardcoded */}
+                                <div className="text-5xl md:text-6xl font-black text-white mb-2 tabular-nums">
+                                    <Counter end={realValue} key={realValue} />
+                                    <span className="text-2xl ml-1 text-gray-400">+</span>
+                                </div>
 
-                            {/* Suffix */}
-                            <div className="text-lg font-semibold text-gray-300 mb-1">
-                                {stat.suffix}
-                            </div>
+                                {/* Suffix */}
+                                <div className="text-lg font-semibold text-gray-300 mb-1">
+                                    {stat.suffix}
+                                </div>
 
-                            {/* Label */}
-                            <div className="text-sm text-gray-500 leading-relaxed">
-                                {stat.label}
-                            </div>
-                        </motion.div>
-                    ))}
+                                {/* Label */}
+                                <div className="text-sm text-gray-500 leading-relaxed">
+                                    {stat.label}
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
         </section>
