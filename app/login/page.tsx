@@ -92,7 +92,7 @@ export default function LoginPage() {
                                     <input
                                         type="email"
                                         required
-                                        placeholder="admin@genz-ignite.com"
+                                        placeholder="admin@genz-ignite.js"
                                         className="w-full bg-black/40 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
