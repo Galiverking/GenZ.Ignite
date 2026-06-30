@@ -1,23 +1,32 @@
-// Since this is a school project and there's no complex backend currently, 
-// we'll implement a simple pin/password based auth or rely on Supabase Auth.
-// This is a placeholder for actual use in admin layout.
+/**
+ * Authentication utilities for GenZ Ignite.
+ *
+ * 🔐 SECURITY ARCHITECTURE:
+ *   Layer 1: Middleware (server-side) → protects /admin routes
+ *            เรียก supabase.auth.getUser() ถ้าไม่มี → redirect /login
+ *            ไม่สามารถ bypass ด้วยการ disable JS
+ *   Layer 2: RLS Policies (database-level) → public.is_admin() function
+ *            ใช้ auth.uid() ตรวจสอบ admin_users table
+ *            ป้องกัน unauthorized data access แม้ bypass frontend
+ *   Layer 3: Client-side check (UX only) → ใน Admin Layout
+ *            ถ้า session expire ระหว่างใช้งาน → redirect
+ *
+ * ⚠️ client-side isAdmin() นี้ใช้สำหรับ UX convenience เท่านั้น
+ *    อย่าใช้เป็น security boundary
+ */
 
 import { createClient } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 
-/**
- * Basic check if current user is admin.
- * In a real production app, this would use proper Server Side auth tokens.
- * Here we might just use local storage or a simple session check for the frontend.
- */
 export const isAdmin = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabase.auth.getSession();
 
-    // For GenZ Ignite, if we have a session, assume admin for now
-    // Or check email against an allowed list
-    if (!session) return false;
+  if (!session) return false;
 
-    // Example restricted check:
-    // return session.user.email === 'admin@genzignite.com';
-    return true;
+  // NOTE: ตัวตรวจสอบ admin จริงอยู่ที่ RLS policy (database-level)
+  // ใช้ public.is_admin() function + admin_users table
+  // Client-side check นี้เป็นแค่ UX layer — middleware + RLS
+  // เป็น security boundary ตัวจริง
+
+  return true;
 };

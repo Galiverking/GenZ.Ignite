@@ -1,8 +1,15 @@
 -- ========================================================
 -- 🛡️ GENZ IGNITE: SECURE SYSTEM SETUP & MIGRATION SCRIPT
 -- ========================================================
--- คัดลอกโค้ดทั้งหมดในหน้านี้ แล้วนำไปวางและรัน (Run) ใน SQL Editor ของ Supabase
--- เพื่อสร้างตารางตั้งค่าระบบ, ฟังก์ชัน RPC ปลอดภัย และอัปเดตสิทธิ์ RLS ให้รัดกุม 100%
+-- !⚠️  UPDATE REQUIRED  ⚠️!
+-- ไฟล์นี้ใช้ auth.jwt() ->> 'email' = 'admin@genz-ignite.com' = HARDCODED EMAIL
+-- ซึ่งไม่ secure: เปลี่ยน email ใน auth.users แล้ว lock ทันที
+--
+-- ✅ ให้ใช้ db/04_admin_security_fix.sql แทน
+--    ใช้ admin_users table + is_admin() function 
+--    รองรับ multi-admin และยืดหยุ่นกว่า
+--
+-- === OLD CONTENT (รักษาไว้สำหรับ reference) ===
 
 -- --------------------------------------------------------
 -- 1. สร้างตาราง Site Settings (ตารางตั้งค่าระบบ)

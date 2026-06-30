@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * Admin Layout — UI Layer
+ *
+ * 🔐 SECURITY ARCHITECTURE (Defense in Depth):
+ *   Layer 1: Middleware (server) → middleware.ts
+ *            ตรวจ auth ก่อนถึงหน้านี้ ถ้าไม่มี session → redirect /login
+ *            bypass ด้วย disable JS ไม่ได้
+ *   Layer 2: RLS Policies (database) → db/04_admin_security_fix.sql
+ *            public.is_admin() function ตรวจ admin_users table
+ *   Layer 3: Client-side check (UX layer — THIS FILE)
+ *            รับ session expiry ระหว่างใช้งาน
+ *            ทำงานหลังจาก middleware ผ่านแล้ว
+ */
+
 import Link from "next/link";
 import { Users, FileText, Settings, LayoutDashboard, MessageSquare, LogOut, Search, Bell, Loader2, ShieldAlert, Megaphone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +24,6 @@ import { clsx } from "clsx";
 import NotificationBell from "@/components/admin/NotificationBell";
 
 export default function AdminLayout({
-
     children,
 }: {
     children: React.ReactNode;
@@ -22,9 +35,9 @@ export default function AdminLayout({
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
+        // Session check — defense in depth (middleware already verified auth)
         const checkAuth = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-
             if (!session) {
                 router.replace("/login");
             } else {
@@ -35,6 +48,7 @@ export default function AdminLayout({
 
         checkAuth();
 
+        // Listen for session expiry during use
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             if (!session) {
                 router.replace("/login");

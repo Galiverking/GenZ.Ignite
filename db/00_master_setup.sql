@@ -1,8 +1,15 @@
 -- ==========================================
 -- 🚀 GENZ IGNITE: MASTER DATABASE SETUP SCRIPT
 -- ==========================================
--- คัดลอกโค้ดทั้งหมดในหน้านี้ แล้วนำไปวางและรัน (Run) ใน SQL Editor ของ Supabase
--- เพื่อสร้างตารางทั้งหมดและเปิดสิทธิ์การใช้งานให้ครบถ้วน
+-- 
+-- !⚠️  DEPRECATED — RLS section (บรรทัด 76-129) มี policies อันตราย!
+--    กำลังสร้าง INSERT/UPDATE/DELETE USING (true) = เปิดให้ทุกคนเขียน DB
+--    ✅ ให้ใช้ db/04_admin_security_fix.sql แทน สำหรับ RLS policies
+--
+-- ส่วน CREATE TABLE ด้านบนปลอดภัย (IF NOT EXISTS) ใช้เป็น schema reference ได้
+-- แต่ถ้าต้องการรันทั้งหมด → รัน 04_admin_security_fix.sql ทีหลังเพื่อ override policies
+--
+-- ==========================================
 
 -- 1. สร้างตาราง Announcements (ประชาสัมพันธ์)
 CREATE TABLE IF NOT EXISTS announcements (
