@@ -6,9 +6,7 @@ export default function Footer() {
                     © {new Date().getFullYear()} สภานักเรียน GenZ Ignite. All rights reserved.
                 </div>
                 <div className="flex gap-6">
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">Twitter</a>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">Instagram</a>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">Facebook</a>
+                    <a href="https://www.instagram.com/sapha.juntra69?igsh=MWkzdnJwem51MWczdg==" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">Instagram</a>
                 </div>
             </div>
         </footer>
