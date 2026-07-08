@@ -35,3 +35,6 @@ next-env.d.ts
 
 # credentials
 infor.txt
+picture /
+.env.prod
+.env.vercel_full
